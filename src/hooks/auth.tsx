@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useState, useContext } from 'react';
+import { decode } from 'jsonwebtoken';
 import api from '../services/api';
 
 interface User {
@@ -23,6 +24,10 @@ interface AuthContextData {
   signOut(): void;
 }
 
+interface TokenDecoded {
+  exp: number;
+}
+
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 const AuthProvider: React.FC = ({ children }) => {
@@ -30,7 +35,19 @@ const AuthProvider: React.FC = ({ children }) => {
     const token = localStorage.getItem('@Gobarber:token');
     const user = localStorage.getItem('@Gobarber:user');
 
+    if (token) {
+      const tokenDecoded = decode(token) as TokenDecoded;
+      if (Date.now() >= tokenDecoded.exp * 1000) {
+        localStorage.removeItem('@Gobarber:token');
+        localStorage.removeItem('@Gobarber:user');
+
+        return {} as AuthState;
+      }
+    }
+
     if (token && user) {
+      api.defaults.headers.authorization = `Bearer ${token}`;
+
       return { token, user: JSON.parse(user) };
     }
 
@@ -47,6 +64,8 @@ const AuthProvider: React.FC = ({ children }) => {
 
     localStorage.setItem('@Gobarber:token', token);
     localStorage.setItem('@Gobarber:user', JSON.stringify(user));
+
+    api.defaults.headers.authorization = `Bearer ${token}`;
 
     setData({ token, user });
   }, []);
