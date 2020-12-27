@@ -6,6 +6,7 @@ import 'react-day-picker/lib/style.css';
 
 import { FiClock, FiPower } from 'react-icons/fi';
 import { parseISO } from 'date-fns/esm';
+import { Link } from 'react-router-dom';
 import {
   Container,
   Header,
@@ -147,7 +148,9 @@ const Dashboard: React.FC = () => {
 
             <div>
               <span>Bem-vindo,</span>
-              <span>{user.name}</span>
+              <Link to="/profile">
+                <strong>{user.name}</strong>
+              </Link>
             </div>
           </Profile>
 
@@ -210,6 +213,8 @@ const Dashboard: React.FC = () => {
           </Section>
 
           <Section>
+            <strong>Tarde</strong>
+
             {afternoonAppointments.length === 0 && (
               <p>Nenhum agendamento pela tarde</p>
             )}
